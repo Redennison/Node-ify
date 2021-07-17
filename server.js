@@ -4,12 +4,15 @@ const mongoose = require('mongoose');
 const User = require('./model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const apiKey = 'SK4d0ced1b93ae8cfe8abb2be56bd983a0';
-const apiSecret = 'At074YMnhBGBUwynF1m7sGzCRLWWaHX1';
-const accountSid = 'ACb767e58d154f94a9ca93bfdb7f95bc5e';
+const dotenv = require('dotenv');
+
+dotenv.config();
+const apiKey = process.env.KEY;
+const apiSecret = process.env.SECRET;
+const accountSid = process.env.SID;
 const client = require('twilio')(apiKey, apiSecret, { accountSid: accountSid });
 
-const JWT_SECRET = 'kjfds95848*&(%*((hfiehkjlsgdjag8#*fdksjgklg8389250%87589-375189985';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const app = express();
 
