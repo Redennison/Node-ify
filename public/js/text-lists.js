@@ -7,6 +7,9 @@ document.getElementById('title').innerHTML = `${username}'s Lists`;
 // Declare global variables
 const lists = document.getElementById('lists'); 
 const listContentsDiv = document.getElementById('listContents');
+const list_title = document.getElementById('list-title');
+const form = document.getElementById('form');
+const list = document.getElementById('list');
 var user;
 
 // Displays lists + button on left side
@@ -60,12 +63,15 @@ const disableButtons = () => {
 }
 
 // Messages people in list
-const message = (_id, listNameLen) => {
+const message = (_id) => {
     disableButtons();
-    var index = 487 + listNameLen*2;
-    if (listNameLen / 10 >= 1) index += 4;
-    else index += 2;
-    listContentsDiv.innerHTML = listContentsDiv.innerHTML.substr(0, index) + `<form id='newMessageForm' class='mb-3'><textarea id='messageTextArea' class='py-2 px-2' type='text' placeholder='Enter Message Here...' required></textarea><button class='messageButtons py-2' type='submit'>+</button><button class='messageButtons py-2' onclick="displayListContents('${_id}');disableButtons();">-</button></form>` + listContentsDiv.innerHTML.substr(index);
+
+    // create form 
+    form.innerHTML = `
+        <form id='newMessageForm' class='mb-3'>
+            <textarea id='messageTextArea' class='py-2 px-2' type='text' placeholder='Enter Message Here...' required></textarea>  <button class='messageButtons py-2' type='submit'>+</button><button class='messageButtons py-2' onclick="displayListContents('${_id}');disableButtons();">-</button>
+        </form>
+    `;
 
     const newMessageForm = document.getElementById('newMessageForm');
     setHeight(newMessageForm);
@@ -86,6 +92,8 @@ const message = (_id, listNameLen) => {
             })
         }).then((res) => res.json());
 
+        console.log(result.status);
+
         if (result.status === 'ok') {
             disableButtons();
             displayListContents(_id);
@@ -97,12 +105,15 @@ const message = (_id, listNameLen) => {
 
 
 // Adds person to list
-const addPerson = (_id, listNameLen) => {
+const addPerson = (_id) => {
     disableButtons();
-    var index = 487 + listNameLen*2;
-    if (listNameLen / 10 >= 1) index += 4;
-    else index += 2;
-    listContentsDiv.innerHTML = listContentsDiv.innerHTML.substr(0, index) + `<form id='addPersonForm' class='mb-3'><input maxlength='40' class='py-2 px-2' id='personName' type='text' placeholder='Name' required/><input class='py-2 px-2' id='personNumber' type='tel' pattern='[0-9]{10}' placeholder='Phone Number' required/><button class='py-2' id='addPerson' type='submit'>+</button><button onclick="displayListContents('${_id}');disableButtons();" id='cancelPerson' class='py-2' onclick='displayLists(user.lists)'>-</button></form>` + listContentsDiv.innerHTML.substr(index);
+
+    // create form 
+    form.innerHTML = `
+        <form id='addPersonForm' class='mb-3'>
+            <input maxlength='40' class='py-2 px-2' id='personName' type='text' placeholder='Name' required/><input class='py-2 px-2' id='personNumber' type='tel' pattern='[0-9]{10}' placeholder='Phone Number' required/><button class='py-2' id='addPerson' type='submit'>+</button><button onclick="displayListContents('${_id}');disableButtons();" id='cancelPerson' class='py-2' onclick='displayLists(user.lists)'>-</button>
+        </form>
+    `;
 
     const addPersonForm = document.getElementById('addPersonForm');
     setHeight(addPersonForm);
@@ -157,6 +168,8 @@ async function deleteList(_id, listName) {
             if (user.lists.length > 0)  {
                 displayListContents(user.lists[0]._id);
                 document.getElementById(user.lists[0]._id).setAttribute('style', 'background-color: rgb(87, 85, 85);color: white');
+            } else {
+                listContentsDiv.innerHTML = "";
             }
             lists.scrollTop = 0;
         } else { 
@@ -228,12 +241,19 @@ const addList = () => {
 const displayListContents = (_id) => { 
     for (i=0;i<user.lists.length;i++) {
         if (user.lists[i]._id === _id) {
-            var html = `<div id='listsTitle'><h2 class='py-2 px-3' id='listNameTitle'>${user.lists[i].listName}</h2><div class='p-2'><input class='listButtons p-2' type='image' src='images/plus.png' onclick="addPerson('${_id}',${user.lists[i].listName.length})"></input><input class='listButtons p-2 mx-3' type='image' src='images/comment.png' onclick="message('${_id}',${user.lists[i].listName.length})"></input><input class='listButtons p-2' type='image' src='images/trash.png' onclick="deleteList('${_id}','${user.lists[i].listName}')"></input></div></div><ul id='peopleList' class='px-1'>`;
+            // Remove form
+            form.innerHTML = '';
+
+            // Set list title
+            list_title.innerHTML = `<div id='listsTitle'><h2 class='py-2 px-3' id='listNameTitle'>${user.lists[i].listName}</h2><div class='p-2'><input class='listButtons p-2' type='image' src='images/plus.png' onclick="addPerson('${_id}')"></input><input class='listButtons p-2 mx-3' type='image' src='images/comment.png' onclick="message('${_id}')"></input><input class='listButtons p-2' type='image' src='images/trash.png' onclick="deleteList('${_id}','${user.lists[i].listName}')"></input></div></div>`;
+
+            // Display people in list
+            list_html = `<ul id='peopleList' class='px-1'>`;
             for (j=0;j<user.lists[i].listContents.length;j++) {
-                html += `<li class='mb-3'><div class='name px-2'>Name: ${user.lists[i].listContents[j].name}</div><div class='number px-2'>Phone Number: ${user.lists[i].listContents[j].number}</div><input class='deletePerson px-2' type='image' src='images/delete.png' onclick="removePerson('${user.lists[i].listContents[j]._id}','${user.lists[i]._id}')"></input></li>`
+                list_html += `<li class='mb-3'><div class='name px-2'>Name: ${user.lists[i].listContents[j].name}</div><div class='number px-2'>Phone Number: ${user.lists[i].listContents[j].number}</div><input class='deletePerson px-2' type='image' src='images/delete.png' onclick="removePerson('${user.lists[i].listContents[j]._id}','${user.lists[i]._id}')"></input></li>`;
             } 
-            html += '</ul>';
-            listContentsDiv.innerHTML = html;
+            list_html += '</ul>';
+            list.innerHTML = list_html;
             break;
         }
     }

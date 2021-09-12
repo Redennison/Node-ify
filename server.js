@@ -1,5 +1,4 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const User = require('./model/user');
 const bcrypt = require('bcryptjs');
@@ -20,14 +19,14 @@ const port = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
 
-mongoose.connect('mongodb+srv://admin:Tk3fP5swqi6NbDDi@cluster0.w69ha.mongodb.net/text-chain-db?retryWrites=true&w=majority', {
+mongoose.connect(process.env.URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true
 });
 
 app.use(express.static(__dirname + '/public'));
-app.use(bodyParser.json());
+app.use(express.json());
 
 app.get('/', (req, res) => {
     res.redirect('/register');
@@ -45,8 +44,12 @@ app.get('/change-password', (req, res) => {
     res.render('change-password');
 })
 
-app.get('/text-lists', async (req, res) => {
+app.get('/text-lists', (req, res) => {
     res.render('text-lists');
+})
+
+app.get('/start-up', (req, res) => {
+    res.render('start-up');
 })
 
 app.post('/api/get-lists', async (req, res) => {
@@ -63,18 +66,28 @@ app.post('/api/send-message', async (req, res) => {
     }
 
     const listContents = (await User.findOne({ "lists._id": _id }, { "lists.$": 1 })).lists[0].listContents;
+    var success = true;
 
-    for (i=0;i<listContents.length;i++) {
-        client.messages
-            .create({
-                body: `Hi ${listContents[i].name},\n${message}\n${username}`,
-                from: '+16043635574',
-                to: `+1${listContents[i].number}`
-            })
-            .then(message => console.log(message))
-            .catch(() => {
-                return res.json({ status: 'error', error: 'Unable to send message(s). Please try again.' });
-            });
+    try {
+        for (i=0;i<listContents.length;i++) {
+            client.messages
+                .create({
+                    body: `Hi ${listContents[i].name},\n${message}\n${username}`,
+                    from: '+16043635574',
+                    to: `+1${listContents[i].number}`
+                })
+                .catch(() => {
+                    // return res.json error
+                    success = false;
+                })
+                .then(() => {
+                    if (!success) {
+                        return res.json({ status: 'error', error: 'As this is not a production application the text will not be sent to avoid charges.' });
+                    }
+                });
+        }
+    } catch {
+        return res.json({ status: 'error', error: 'Unable to send message. Please try again.' });
     }
 
     res.json({ status: 'ok' });
