@@ -68,6 +68,8 @@ app.post('/api/send-message', async (req, res) => {
     const listContents = (await User.findOne({ "lists._id": _id }, { "lists.$": 1 })).lists[0].listContents;
     var success = true;
 
+    return res.json({status: 'error', error: "This website is for demonstration purposes only. SMS messaging is currently disabled as we don't want to allow public access to messaging."})
+
     try {
         for (i=0;i<listContents.length;i++) {
             client.messages
