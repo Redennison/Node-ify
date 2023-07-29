@@ -6,7 +6,6 @@ document.getElementById('title').innerHTML = `${username}'s Lists`;
 
 // Declare global variables
 const lists = document.getElementById('lists'); 
-const listContentsDiv = document.getElementById('listContents');
 const list_title = document.getElementById('list-title');
 const form = document.getElementById('form');
 const list = document.getElementById('list');
@@ -169,7 +168,10 @@ async function deleteList(_id, listName) {
                 displayListContents(user.lists[0]._id);
                 document.getElementById(user.lists[0]._id).setAttribute('style', 'background-color: rgb(87, 85, 85);color: white');
             } else {
-                listContentsDiv.innerHTML = "";
+                form.innerHTML = '';
+                list_title.innerHTML = '';
+                list.innerHTML = '';
+
             }
             lists.scrollTop = 0;
         } else { 
@@ -241,12 +243,13 @@ const addList = () => {
 const displayListContents = (_id) => { 
     for (i=0;i<user.lists.length;i++) {
         if (user.lists[i]._id === _id) {
+            console.log(user.lists[i].listName);
             // Remove form
             form.innerHTML = '';
 
             // Set list title
             list_title.innerHTML = `<div id='listsTitle'><h2 class='py-2 px-3' id='listNameTitle'>${user.lists[i].listName}</h2><div class='p-2'><input class='listButtons p-2' type='image' src='images/plus.png' onclick="addPerson('${_id}')"></input><input class='listButtons p-2 mx-3' type='image' src='images/comment.png' onclick="message('${_id}')"></input><input class='listButtons p-2' type='image' src='images/trash.png' onclick="deleteList('${_id}','${user.lists[i].listName}')"></input></div></div>`;
-
+            console.log(list_title.innerHTML);
             // Display people in list
             list_html = `<ul id='peopleList' class='px-1'>`;
             for (j=0;j<user.lists[i].listContents.length;j++) {
