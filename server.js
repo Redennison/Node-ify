@@ -6,8 +6,6 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 
 dotenv.config();
-
-// Twilio keys
 const apiKey = process.env.KEY;
 const apiSecret = process.env.SECRET;
 const accountSid = process.env.SID;
