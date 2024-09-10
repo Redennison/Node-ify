@@ -1,3 +1,6 @@
+// Get user_id from local storage
+const user_id = localStorage.getItem('user_id')
+
 const form = document.getElementById('changePwd');
 form.addEventListener('submit', changePwd);
 
@@ -12,7 +15,8 @@ async function changePwd(event) {
         },
         body: JSON.stringify ({
             newpassword: password,
-            token: localStorage.getItem('token')
+            token: localStorage.getItem('token'),
+            _id: user_id
         })
     }).then((res) => res.json());
 

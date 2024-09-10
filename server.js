@@ -4,6 +4,7 @@ const User = require('./model/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const jwtAuth = require('./middleware/jwtAuth')
 
 dotenv.config();
 const apiKey = process.env.KEY;
@@ -52,13 +53,14 @@ app.get('/start-up', (req, res) => {
     res.render('start-up');
 })
 
-app.post('/api/get-lists', async (req, res) => {
+app.post('/api/get-lists', jwtAuth, async (req, res) => {
     const { username } = req.body;
+
     const user = await User.findOne({ username }).lean(); 
     res.json({ status: 'ok', user });
 })
 
-app.post('/api/send-message', async (req, res) => {
+app.post('/api/send-message', jwtAuth, async (req, res) => {
     const { username, message, _id } = req.body;
 
     if (!message || typeof message !== 'string') {
@@ -95,7 +97,7 @@ app.post('/api/send-message', async (req, res) => {
     res.json({ status: 'ok' });
 })
 
-app.post('/api/remove-person', async (req, res) => {
+app.post('/api/remove-person', jwtAuth, async (req, res) => {
     const { username, person_id: _id } = req.body;
 
     try {
@@ -120,7 +122,7 @@ app.post('/api/remove-person', async (req, res) => {
     res.json({ status: 'ok', user });
 })
 
-app.post('/api/add-person', async (req, res) => {
+app.post('/api/add-person', jwtAuth, async (req, res) => {
     const { username, name, number, _id } = req.body;
 
     const listContents = (await User.findOne({ "lists._id": _id }, { "lists.$": 1 })).lists[0].listContents;
@@ -156,7 +158,7 @@ app.post('/api/add-person', async (req, res) => {
     res.json({ status: 'ok', user });
 })
 
-app.post('/api/remove-list', async (req, res) => {
+app.post('/api/remove-list', jwtAuth, async (req, res) => {
     const { username, _id } = req.body;
 
     try {
@@ -181,7 +183,7 @@ app.post('/api/remove-list', async (req, res) => {
     res.json({ status: 'ok', user });
 })
 
-app.post('/api/create-list', async (req, res) => {
+app.post('/api/create-list', jwtAuth, async (req, res) => {
     const { listName, username } = req.body;
 
     if (await User.find({ username, "lists.listName": listName }).countDocuments() > 0) {
@@ -205,8 +207,8 @@ app.post('/api/create-list', async (req, res) => {
     res.json({ status: 'ok', user });
 })
 
-app.post('/api/change-password', async (req, res) => {
-    const { token, newpassword: plainTextPassword } = req.body;
+app.post('/api/change-password', jwtAuth, async (req, res) => {
+    const { _id, newpassword: plainTextPassword } = req.body;
 
     if (!plainTextPassword || typeof plainTextPassword !== 'string') {
         return res.json({ status: 'error', error: 'Invalid password' });
@@ -217,10 +219,6 @@ app.post('/api/change-password', async (req, res) => {
     }
 
     try {
-        const user = jwt.verify(token, JWT_SECRET);
-
-        const _id = user.id;
-
         const hashedPassword = await bcrypt.hash(plainTextPassword, 10);
 
         await User.updateOne(
@@ -255,7 +253,7 @@ app.post('/api/login', async(req, res) => {
             JWT_SECRET
         );
 
-        return res.json({ status: 'ok', data: token, username: user.username });
+        return res.json({ status: 'ok', data: token, username: user.username, user_id: user._id });
     }
 
     res.json({ status: 'error', error: 'Invalid username/password' });

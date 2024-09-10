@@ -1,5 +1,7 @@
 // Get username from front-end storage
 const username = localStorage.getItem('username');
+// Get JWT from front-end storage
+const token = localStorage.getItem('token')
 
 // Set title as username's lists
 document.getElementById('title').innerHTML = `${username}'s Lists`;
@@ -87,7 +89,8 @@ const message = (_id) => {
             body: JSON.stringify ({
                 username,
                 message,
-                _id
+                _id,
+                token
             })
         }).then((res) => res.json());
 
@@ -131,7 +134,8 @@ const addPerson = (_id) => {
                 username,
                 name,
                 number,
-                _id
+                _id,
+                token
             })
         }).then((res) => res.json());
 
@@ -157,7 +161,8 @@ async function deleteList(_id, listName) {
             },
             body: JSON.stringify ({
                 username,
-                _id
+                _id,
+                token
             })
         }).then((res) => res.json());
 
@@ -191,7 +196,8 @@ async function removePerson(person_id, list_id) {
         },
         body: JSON.stringify ({
             username,
-            person_id
+            person_id,
+            token
         })
     }).then((res) => res.json());
 
@@ -222,7 +228,8 @@ const addList = () => {
             },
             body: JSON.stringify ({
                 listName,
-                username
+                username,
+                token
             })
         }).then((res) => res.json());
 
@@ -270,7 +277,8 @@ async function getLists() {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify ({
-            username
+            username,
+            token
         })
     }).then((res) => res.json());
 

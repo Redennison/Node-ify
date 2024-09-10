@@ -21,6 +21,7 @@ async function login(event) {
         console.log(`Got the token: ${result.data}`);
         localStorage.setItem('token', result.data);
         localStorage.setItem('username', result.username);
+        localStorage.setItem('user_id', result.user_id)
         location.href = '/text-lists';
     } else {
         alert(result.error);
